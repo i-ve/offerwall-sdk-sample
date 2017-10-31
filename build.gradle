@@ -16,6 +16,8 @@ allprojects {
     repositories {
         jcenter()
         maven { url "https://raw.githubusercontent.com/i-ve/offerwall-sdk-mvn-repo/master/releases" }
+        maven { url "https://raw.githubusercontent.com/i-ve/offerwall-sdk-mvn-repo/master/snapshots" }
+        maven { url "https://maven.google.com" }
     }
 }
 
