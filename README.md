@@ -85,7 +85,7 @@ IveOfferwall.usePoint(context, userId, point, IveOfferwall.UsePointListener);
 ```
 point만큼의 포인트를 사용합니다. 사용 결과는 `IveOfferwall.UsePointListener`를 통해 전달됩니다.
 
-#### IveOfferwall.UsePointListener 인터페이스
+#### 2-4-1. IveOfferwall.UsePointListener 인터페이스
 아이브 서버로부터 유저 포인트 사용 결과를 받습니다.
 ```java
 public void onUsePointComplete(boolean isSuccess, long remainPoint, String errorMessage);
