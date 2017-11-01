@@ -69,7 +69,7 @@ IveOfferwall.getPoint(context, userId, IveOfferwall.GetPointListener);
 ```
 유저가 획득한 포인트는 비동기 방식으로 받아와서 `IveOfferwall.GetPointListener`로 전달됩니다.
 
-#### IveOfferwall.GetPointListener 인터페이스
+#### 2-3-1. IveOfferwall.GetPointListener 인터페이스
 아이브 서버로부터 유저 포인트를 가져옵니다.
 
 ```java
