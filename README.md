@@ -1,5 +1,5 @@
 # offerwall-sdk-sample
-IVE 오퍼월 SDK Sample 프로젝트입니다.
+오퍼월 SDK Sample 프로젝트입니다.
 
 ## 1. 프로젝트 설정
 ### 1-1. 프로젝트의 gradle.properties 파일의 repositories에 다음의 maven 저장소를 추가합니다.
@@ -31,7 +31,7 @@ Sync를 하게 되면 메이븐 저장소에서 오퍼월 SDK 라이브러리를
 <meta-data android:name="ive_sdk_appcode" android:value="TIdKKXBq9C" />
 <meta-data android:name="ive_sdk_offerwall_title" android:value="오퍼월 테스트 프로젝트" />
 ```
-* `ive_sdk_app_code`의 값에는 아이브에서 발급받은 앱코드를 삽입합니다. 위에서 사용하고 있는 값은 테스트를 위한 용도입니다.
+* `ive_sdk_app_code`의 값에는 발급받은 앱코드를 삽입합니다. 위에서 사용하고 있는 값은 테스트를 위한 용도입니다.
 * `ive_sdk_offerwall_title`의 값에는 오퍼월 액티비티의 제목으로 사용할 텍스트를 넣습니다.
 
 ## 2. 오퍼월 SDK 사용하기
