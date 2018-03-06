@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,11 +18,13 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import kr.ive.offerwall_sdk.IveOfferwall;
+import kr.ive.offerwall_sdk.IveOfferwallStyle;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, IveOfferwall.GetPointListener, IveOfferwall.UsePointListener {
     public static final String TAG = "MainActivity";
 
     private TextView mPointTextView;
+    private String mTransactionKey;
 
     private interface OnNumberInputDialogListener {
         void onNumberInput(int number);
@@ -96,15 +99,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void openOfferwallActivity() {
         String id = getId();
         if(checkValidId(id)) {
-            IveOfferwall.openActivity(this, id);
+            IveOfferwall.openActivity(this, id, makeStyle());
         }
     }
 
     private void openOfferwallFragment() {
         String id = getId();
         if(checkValidId(id)) {
-            setFragment(IveOfferwall.createFragment(this, id));
+            setFragment(IveOfferwall.createFragment(this, id, makeStyle()));
         }
+    }
+
+    private IveOfferwallStyle makeStyle() {
+        IveOfferwallStyle style = new IveOfferwallStyle();
+        style.setColor(IveOfferwallStyle.Color.STATUS_BAR, ContextCompat.getColor(this, android.R.color.holo_blue_dark));
+        style.setColor(IveOfferwallStyle.Color.TOOL_BAR_BG, ContextCompat.getColor(this, android.R.color.holo_blue_light));
+        style.setColor(IveOfferwallStyle.Color.TOOL_BAR_TEXT, ContextCompat.getColor(this, android.R.color.white));
+        style.setColor(IveOfferwallStyle.Color.BUTTON_BG, ContextCompat.getColor(this, android.R.color.widget_edittext_dark));
+        style.setColor(IveOfferwallStyle.Color.BUTTON_TEXT, ContextCompat.getColor(this, android.R.color.background_light));
+        style.setColor(IveOfferwallStyle.Color.ACCENT_TEXT, ContextCompat.getColor(this, android.R.color.holo_blue_light));
+        return style;
     }
 
     private void setFragment(Fragment fragment) {
@@ -116,7 +130,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void getUserPoint() {
         String id = getId();
         if(checkValidId(id)) {
-            IveOfferwall.getPoint(this, id, this);
+            mTransactionKey = IveOfferwall.getPoint(this, id, this);
         }
     }
 
@@ -126,7 +140,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             showNumberInputDialog("사용할 포인트를 입력해주세요.", new OnNumberInputDialogListener() {
                 @Override
                 public void onNumberInput(int number) {
-                    IveOfferwall.usePoint(MainActivity.this, id, number, MainActivity.this);
+                    mTransactionKey = IveOfferwall.usePoint(MainActivity.this, id, number, MainActivity.this);
                 }
             });
         }
@@ -180,14 +194,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
-    public void onGetPointComplete(boolean isSuccess, long point, String errorMessage) {
-        setPoint(point);
+    public void onGetPointComplete(boolean isSuccess, long point, String errorMessage, String hash) {
+        if(isSuccess) {
+            if(IveOfferwall.isValidTransaction(getId(), point, mTransactionKey, hash)) {
+                setPoint(point);
+            } else {
+                setPoint(0);
+                showAlertDialog("유효하지 않은 트랜잭션입니다.", null);
+            }
+        } else {
+            setPoint(0);
+            showAlertDialog("유효하지 않은 트랜잭션입니다.", null);
+        }
     }
 
     @Override
-    public void onUsePointComplete(boolean isSuccess, long remainPoint, String errorMessage) {
+    public void onUsePointComplete(boolean isSuccess, long remainPoint, String errorMessage, String hash) {
         if(isSuccess) {
-            setPoint(remainPoint);
+            if(IveOfferwall.isValidTransaction(getId(), remainPoint, mTransactionKey, hash)) {
+                setPoint(remainPoint);
+            } else {
+                setPoint(0);
+                showAlertDialog("유효하지 않은 트랜잭션입니다.", null);
+            }
         } else {
             showAlertDialog(errorMessage, null);
         }
