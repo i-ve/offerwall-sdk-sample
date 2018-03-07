@@ -3,6 +3,7 @@ package kr.ive.ive_offerwall_sdk_sample;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
@@ -114,8 +115,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         IveOfferwallStyle style = new IveOfferwallStyle();
         style.setColor(IveOfferwallStyle.Color.STATUS_BAR, ContextCompat.getColor(this, android.R.color.holo_blue_dark));
         style.setColor(IveOfferwallStyle.Color.TOOL_BAR_BG, ContextCompat.getColor(this, android.R.color.holo_blue_light));
-        style.setColor(IveOfferwallStyle.Color.TOOL_BAR_TEXT, ContextCompat.getColor(this, android.R.color.white));
-        style.setColor(IveOfferwallStyle.Color.BUTTON_BG, ContextCompat.getColor(this, android.R.color.widget_edittext_dark));
+        style.setColor(IveOfferwallStyle.Color.TOOL_BAR_TEXT, Color.parseColor("#fffefefe"));
+        style.setColor(IveOfferwallStyle.Color.BUTTON_BG, Color.argb(255, 100, 20, 10));
         style.setColor(IveOfferwallStyle.Color.BUTTON_TEXT, ContextCompat.getColor(this, android.R.color.background_light));
         style.setColor(IveOfferwallStyle.Color.ACCENT_TEXT, ContextCompat.getColor(this, android.R.color.holo_blue_light));
         return style;
