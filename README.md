@@ -21,7 +21,7 @@ allprojects {
 ### 1-2. 모듈의 gradle.properties 파일의 dependencies에 다음 내용을 추가합니다.
 
 ```groovy
-compile 'kr.ive:offerwall_sdk:1.0.8'
+compile 'kr.ive:offerwall_sdk:1.0.9'
 ```
 gradle 파일을 수정하게 되면 Android Studio에서 `Sync Now`버튼이 보이게 됩니다. 
 Sync를 하게 되면 메이븐 저장소에서 오퍼월 SDK 라이브러리를 다운로드 받게 됩니다.(로컬 저장소에 다운받기 때문에 프로젝트에서는 볼 수 없습니다)
@@ -42,61 +42,172 @@ Sync를 하게 되면 메이븐 저장소에서 오퍼월 SDK 라이브러리를
 오퍼월 `Activity`를 여는 기본적인 방법입니다.
 
 ```java
-IveOfferwall.openActivity(activity, userId);
+IveOfferwall.openActivity(activity, userId, style);
 ```
+
+2번째 인자인 userId는 유저를 식별할 수 있는 유일한 값이어야 합니다.
+
+3번째 인자인 style은 옵션으로 넣을 수 있습니다. 자세한 내용은 [3. 스타일링](#styling)을 참고해주세요.
 
 #### 2-1-2. IveOfferwall.openActivityForResult()
 
 다음의 코드를 사용하면 오퍼월 `Activity`가 `Destroy`될 때 `onActivityResult()` 콜백을 받을 수 있습니다.
 
 ```java
-IveOfferwall.openActivityForResult(activity, userId, requestCode);
+IveOfferwall.openActivityForResult(activity, userId, requestCode, style);
 ```
 
 위 메서드에서 3번째 인자인 `requestCode`는 `onActivityResult()`에서 첫번째 인자인 `requestCode`로 넘어 갑니다.
 
+4번째 인자인 style은 옵션으로 넣을 수 있습니다. 자세한 내용은 [3. 스타일링](#styling)을 참고해주세요.
+
 ### 2-2. 오퍼월 Fragment 생성
 
 ```java
-IveOfferwall.createFragment(context, userId)
+IveOfferwall.createFragment(context, userId, style)
 ```
 - 리턴값 : 생성된 `Fragment`
+
+3번째 인자인 style은 옵션으로 넣을 수 있습니다. 자세한 내용은 [3. 스타일링](#styling)을 참고해주세요.
 
 ### 2-3. 유저 포인트 얻기
 
 ```java
-IveOfferwall.getPoint(context, userId, IveOfferwall.GetPointListener);
+String transactionKey = IveOfferwall.getPoint(context, userId, IveOfferwall.GetPointListener);
 ```
+IveOfferwall.getPoint()를 호출하면 `트랜잭션 키`를 반환합니다. 이 `트랜잭션 키`는 GetPointListener에서 결과를 받을 때 유효성을 검사하는 용도로 사용합니다.
+
 유저가 획득한 포인트는 비동기 방식으로 받아와서 `IveOfferwall.GetPointListener`로 전달됩니다.
 
 #### 2-3-1. IveOfferwall.GetPointListener 인터페이스
 아이브 서버로부터 유저 포인트를 가져옵니다.
 
 ```java
-public void onGetPointComplete(boolean isSuccess, long point, String errorMessage)
+public void onGetPointComplete(boolean isSuccess, long point, String errorMessage, String hash)
 ```
 * isSuccess : 성공 여부
 * point : 포인트
 * errorMessage : 실패인 경우 에러 메시지
+* hash : 해쉬값
+
+`isSuccess`가 `true`인 경우 [트랜잭션의 유효성을 검사](#validate_transaction)해야합니다.
 
 ### 2-4. 유저 포인트 사용하기
 ```java
-IveOfferwall.usePoint(context, userId, point, IveOfferwall.UsePointListener);
+String transactionKey = IveOfferwall.usePoint(context, userId, point, IveOfferwall.UsePointListener);
 ```
+IveOfferwall.usePoint()를 호출하면 `트랜잭션 키`를 반환합니다. 이 `트랜잭션 키`는 UsePointListener에서 결과를 받을 때 유효성을 검사하는 용도로 사용합니다.
+
 point만큼의 포인트를 사용합니다. 사용 결과는 `IveOfferwall.UsePointListener`를 통해 전달됩니다.
 
 #### 2-4-1. IveOfferwall.UsePointListener 인터페이스
 아이브 서버로부터 유저 포인트 사용 결과를 받습니다.
 ```java
-public void onUsePointComplete(boolean isSuccess, long remainPoint, String errorMessage);
+public void onUsePointComplete(boolean isSuccess, long remainPoint, String errorMessage, String hash);
 ```
 * isSuccess : 성공 여부
 * remainPoint : 사용 후 남은 포인트
 * errorMessage : 실패인 경우 에러 메시지
+* hash : 해쉬값
 
-## 3. Trouble Shooting
+`isSuccess`가 `true`인 경우 [트랜잭션의 유효성을 검사](#validate_transaction)해야합니다.
 
-### 3-1. support 라이브러리를 찾을 수 없는 경우
+### 2-5. 트랜잭션의 유효성 검사<a name="validate_transaction"></a>
+
+`IveOfferwall.getPoint()` 나 `IveOfferwall.usePoint()` 를 하는 경우, 트랜잭션이 유효한지 검사해야합니다.
+
+getPoint와 usePoint 둘다 체크하는 방법은 동일하므로, getPoint를 기준으로 설명을 하겠습니다.
+
+유효성을 검사는 다음 메서드로 하게됩니다.
+
+```java
+boolean isValid = IveOfferwall.isValidTransaction(userId, point, transactionKey, hash);
+```
+
+* userId : IveOfferwall.getPoint()에 사용한 userId
+* point : GetPointListener에서 받은 결과 포인트
+* transactionKey : IveOfferwall.getPoint()를 호출하면 즉시 반환되는 트랜잭션 키
+* hash : GetPointListener에서 결과와 함께 받는 해쉬값
+
+위 메서드의 결과 값이 `true`인 경우에만 유효한 트랜잭션이므로 정상적인 처리를 진행하시면 됩니다.
+
+## 3. 스타일링<a name="styling"></a>
+
+`IveOfferwall.openActivity()`나 `IveOfferwall.createFragment()` 등의 메서드를 사용할 때 마지막 인자인 `IveOfferwallStyle`을 추가해 줌으로써 커스텀 스타일링을 할 수 있습니다.
+
+스타일링 설정 방법은 액티비티와 프래그먼트가 동일하므로 액티비티를 기준으로 설명하겠습니다.
+
+`IveOfferwall.openActivity()` 메서드는 `activity`, `userId`를 인자로 받는데, 옵션으로 마지막 인자에 `style`을 추가할 수 있습니다.
+
+즉, 다음과 같이 사용함으로써 기본 스타일을 이용하거나
+
+```java
+IveOfferwall.openActivity(activity, userId);
+```
+
+또는 다음과 같이 사용함으로써 커스텀 스타일을 사용할 수 있습니다.
+
+```java
+IveOfferwall.openActivity(activity, userId, style);
+```
+
+IveOfferwallStyle 객체를 설정하는 예제는 다음과 같습니다.
+
+```java
+IveOfferwallStyle style = new IveOfferwallStyle();
+        style.setColor(IveOfferwallStyle.Color.STATUS_BAR, ContextCompat.getColor(this, android.R.color.holo_blue_dark));
+        style.setColor(IveOfferwallStyle.Color.TOOL_BAR_BG, ContextCompat.getColor(this, android.R.color.holo_blue_light));
+        style.setColor(IveOfferwallStyle.Color.TOOL_BAR_TEXT, ContextCompat.getColor(this, android.R.color.white));
+        style.setColor(IveOfferwallStyle.Color.BUTTON_BG, ContextCompat.getColor(this, android.R.color.widget_edittext_dark));
+        style.setColor(IveOfferwallStyle.Color.BUTTON_TEXT, ContextCompat.getColor(this, android.R.color.background_light));
+        style.setColor(IveOfferwallStyle.Color.ACCENT_TEXT, ContextCompat.getColor(this, android.R.color.holo_blue_light));
+
+ IveOfferwall.openActivity(activity, userId, style);
+```
+
+위 예제를 보면 알 수 있듯이 `style.setColor()`메서드를 통해서 각 부분의 스타일을 변경할 수 있습니다.
+
+#### 3-1. 색상 키
+
+변경 가능한 색상키는 다음과 같습니다.
+
+| 키                               | 설명                                                         |
+| -------------------------------- | ------------------------------------------------------------ |
+| IveOfferwall.Color.STATUS_BAR    | 기기 상단의 상태바 색상을 설정합니다.                        |
+| IveOfferwall.Color.TOOL_BAR_BG   | 툴바의 배경색을 설정합니다.                                  |
+| IveOfferwall.Color.TOOL_BAR_TEXT | 툴바의 글자색을 설정합니다.                                  |
+| IveOfferwall.Color.BUTTON_BG     | 광고 참여 버튼의 배경색을 설정합니다.                        |
+| IveOfferwall.Color.BUTTON_TEXT   | 광고 참여 버튼의 글자색을 설정합니다.                        |
+| IveOfferwall.Color.ACCENT_TEXT   | 강조 텍스트 색상을 설정합니다.(광고 참여를 누르면 나오는 다이얼로그에서의 강조 글자 등이 있습니다. |
+
+### 3-2. 색상 값
+
+색상 값은 리소스 아이디가 아닌 실제 색상에 해당하는 int 값을 넣어야합니다.
+
+색상 값을 얻을 수 있는 몇가지 방법들을 소개합니다.
+
+#### 3-2-1. ContextCompat.getColor() 사용
+
+`ContextCompat.getColor()`메서드의 두번째 인자에 색상의 리소스 아이디를 넣어서 실제 색상을 구할 수 있습니다.
+
+```java
+int color = ContextCompat.getColor(this, android.R.color.widget_edittext_dark);
+```
+
+#### 3-2-2. Color 클래스 사용
+
+[Color](https://developer.android.com/reference/android/graphics/Color.html) 클래스에서 색상 값을 얻을 수 있는 몇가지 방법이 있습니다.
+
+```
+int textColor = Color.parseColor("#fffefefe");
+int bgColor = Color.argb(255, 100, 20, 10);
+```
+
+
+
+## 4. Trouble Shooting
+
+### 4-1. support 라이브러리를 찾을 수 없는 경우
 
 ```groovy
 Failed to resolve: com.android.support:appcompat-v7:25.4.0
@@ -111,7 +222,7 @@ gradle sync 중에 위와 비슷한 메시지를 보게 된다면, 프로젝트�
 maven { url "https://maven.google.com" }
 ```
 
-### 3-2. support 라이브러리의 버전 문제
+### 4-2. support 라이브러리의 버전 문제
 
 프로젝트의 `build.gradle` 파일에 `dependencies` 부분에 특정 support 라이브러리에 빨간 밑줄이 뜨며, 마우스를 가져가면 다음과 같은 메시지가 뜨는 경우가 발생할 수 있습니다.
 
@@ -151,7 +262,12 @@ compile 'com.android.support:design:27.0.0'
 
 필요한 디펜던시를 모두 명시적으로 추가한 뒤에 gradle sync를 수행하면 이 문제를 해결할 수 있습니다.
 
-## 4. SDK 변경 이력
+## 5. SDK 변경 이력
+
+### v 1.0.9
+
+* getPoint / usePoint 시 트랜잭션 유효성을 체크할 수 있는 기능 추가
+* 중요 컴포넌트들의 색상을 변경할 수 있는 스타일링 기능 추가
 
 ### v 1.0.8
 
