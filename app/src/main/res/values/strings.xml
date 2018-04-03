@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">ive-offerwall-sdk-sample</string>
+
+    <string-array name="types_array">
+        <item>NORMAL</item>
+        <item>BIG</item>
+    </string-array>
 </resources>

@@ -2,8 +2,10 @@ package kr.ive.ive_offerwall_sdk_sample;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
@@ -14,18 +16,28 @@ import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import kr.ive.offerwall_sdk.IveOfferwall;
 import kr.ive.offerwall_sdk.IveOfferwallStyle;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, IveOfferwall.GetPointListener, IveOfferwall.UsePointListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, IveOfferwall.GetPointListener, IveOfferwall.UsePointListener, AdapterView.OnItemSelectedListener {
     public static final String TAG = "MainActivity";
+
+    private static final String PREF_NAME = "pref_name";
+    private static final String PREF_KEY_SERVER_TYPE_INDEX = "server_type_index";
+    private static final String PREF_KEY_LIST_TYPE_INDEX = "list_type_index";
 
     private TextView mPointTextView;
     private String mTransactionKey;
+
+    private String mType;
+
 
     private interface OnNumberInputDialogListener {
         void onNumberInput(int number);
@@ -54,6 +66,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         Button useUserPointButton = (Button) findViewById(R.id.use_user_point_button);
         useUserPointButton.setOnClickListener(this);
+
+        Spinner typeSpinner = (Spinner) findViewById(R.id.type_spinner);
+        initSpinner(typeSpinner, R.array.types_array);
+        SharedPreferences sharedPreferences = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
+        int selectedListTypeIndex = sharedPreferences.getInt(PREF_KEY_LIST_TYPE_INDEX, 0);
+        typeSpinner.setSelection(selectedListTypeIndex);
+    }
+
+    private void initSpinner(Spinner spinner, int stringArrayId) {
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                stringArrayId, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(this);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        Log.e(TAG, "onActivityResult() requestCode = " + requestCode);
     }
 
     private void saveId() {
@@ -100,25 +133,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void openOfferwallActivity() {
         String id = getId();
         if(checkValidId(id)) {
-            IveOfferwall.openActivity(this, id, makeStyle());
+            IveOfferwallStyle style = makeStyle();
+
+            IveOfferwall.openActivityForResult(this, id, 100, style);
         }
     }
 
     private void openOfferwallFragment() {
         String id = getId();
         if(checkValidId(id)) {
-            setFragment(IveOfferwall.createFragment(this, id, makeStyle()));
+            IveOfferwallStyle style = makeStyle();
+
+            setFragment(IveOfferwall.createFragment(this, id, style));
         }
     }
 
+    @NonNull
     private IveOfferwallStyle makeStyle() {
         IveOfferwallStyle style = new IveOfferwallStyle();
-        style.setColor(IveOfferwallStyle.Color.STATUS_BAR, ContextCompat.getColor(this, android.R.color.holo_blue_dark));
-        style.setColor(IveOfferwallStyle.Color.TOOL_BAR_BG, ContextCompat.getColor(this, android.R.color.holo_blue_light));
-        style.setColor(IveOfferwallStyle.Color.TOOL_BAR_TEXT, Color.parseColor("#fffefefe"));
-        style.setColor(IveOfferwallStyle.Color.BUTTON_BG, Color.argb(255, 100, 20, 10));
-        style.setColor(IveOfferwallStyle.Color.BUTTON_TEXT, ContextCompat.getColor(this, android.R.color.background_light));
-        style.setColor(IveOfferwallStyle.Color.ACCENT_TEXT, ContextCompat.getColor(this, android.R.color.holo_blue_light));
+        style.setColor(IveOfferwallStyle.Color.STATUS_BAR, Color.parseColor("#dddddd"));
+        style.setColor(IveOfferwallStyle.Color.TOOL_BAR_BG, ContextCompat.getColor(this, android.R.color.white));
+        style.setColor(IveOfferwallStyle.Color.TOOL_BAR_TEXT, ContextCompat.getColor(this, android.R.color.black));
+        style.setColor(IveOfferwallStyle.Color.BUTTON_BG, Color.parseColor("#ff31aa"));
+        style.setColor(IveOfferwallStyle.Color.BUTTON_TEXT, ContextCompat.getColor(this, android.R.color.white));
+        style.setColor(IveOfferwallStyle.Color.ACCENT_TEXT, Color.parseColor("#ff31aa"));
+        style.setType(mType);
         return style;
     }
 
@@ -196,27 +235,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onGetPointComplete(boolean isSuccess, long point, String errorMessage, String hash) {
-        if(isSuccess) {
-            if(IveOfferwall.isValidTransaction(getId(), point, mTransactionKey, hash)) {
-                setPoint(point);
-            } else {
-                setPoint(0);
-                showAlertDialog("유효하지 않은 트랜잭션입니다.", null);
-            }
+        boolean isValid = IveOfferwall.isValidTransaction(getId(), point, mTransactionKey, hash);
+        if(isValid) {
+            setPoint(point);
         } else {
             setPoint(0);
-            showAlertDialog("유효하지 않은 트랜잭션입니다.", null);
+            showAlertDialog("트랜잭션이 유효하지 않습니다.", null);
         }
     }
 
     @Override
     public void onUsePointComplete(boolean isSuccess, long remainPoint, String errorMessage, String hash) {
+        boolean isValid = IveOfferwall.isValidTransaction(getId(), remainPoint, mTransactionKey, hash);
         if(isSuccess) {
-            if(IveOfferwall.isValidTransaction(getId(), remainPoint, mTransactionKey, hash)) {
+            if(isValid) {
                 setPoint(remainPoint);
             } else {
                 setPoint(0);
-                showAlertDialog("유효하지 않은 트랜잭션입니다.", null);
+                showAlertDialog("트랜잭션이 유효하지 않습니다.", null);
             }
         } else {
             showAlertDialog(errorMessage, null);
@@ -225,5 +261,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void setPoint(long point) {
         mPointTextView.setText(String.valueOf(point));
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        int viewId = parent.getId();
+        if(viewId == R.id.type_spinner) {
+            onTypeSpinnerSelected(position);
+        }
+    }
+
+    private void onTypeSpinnerSelected(int position) {
+        if(position == 0) { //NORMAL
+            mType = IveOfferwallStyle.Type.NORMAL;
+        } else if(position == 1) {  //BIG
+            mType = IveOfferwallStyle.Type.BIG;
+        }
+
+        SharedPreferences sharedPreferences = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor edit = sharedPreferences.edit();
+        edit.putInt(PREF_KEY_LIST_TYPE_INDEX, position);
+        edit.apply();
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
     }
 }
