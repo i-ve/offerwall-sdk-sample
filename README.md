@@ -21,7 +21,7 @@ allprojects {
 ### 1-2. 모듈의 gradle.properties 파일의 dependencies에 다음 내용을 추가합니다.
 
 ```groovy
-compile 'kr.ive:offerwall_sdk:1.0.9'
+compile 'kr.ive:offerwall_sdk:1.1.0'
 ```
 gradle 파일을 수정하게 되면 Android Studio에서 `Sync Now`버튼이 보이게 됩니다. 
 Sync를 하게 되면 메이븐 저장소에서 오퍼월 SDK 라이브러리를 다운로드 받게 됩니다.(로컬 저장소에 다운받기 때문에 프로젝트에서는 볼 수 없습니다)
@@ -131,7 +131,7 @@ boolean isValid = IveOfferwall.isValidTransaction(userId, point, transactionKey,
 
 위 메서드의 결과 값이 `true`인 경우에만 유효한 트랜잭션이므로 정상적인 처리를 진행하시면 됩니다.
 
-## 3. 스타일링<a name="styling"></a>
+### 3. 스타일링<a name="styling"></a>
 
 `IveOfferwall.openActivity()`나 `IveOfferwall.createFragment()` 등의 메서드를 사용할 때 마지막 인자인 `IveOfferwallStyle`을 추가해 줌으로써 커스텀 스타일링을 할 수 있습니다.
 
@@ -155,19 +155,35 @@ IveOfferwallStyle 객체를 설정하는 예제는 다음과 같습니다.
 
 ```java
 IveOfferwallStyle style = new IveOfferwallStyle();
-        style.setColor(IveOfferwallStyle.Color.STATUS_BAR, ContextCompat.getColor(this, android.R.color.holo_blue_dark));
-        style.setColor(IveOfferwallStyle.Color.TOOL_BAR_BG, ContextCompat.getColor(this, android.R.color.holo_blue_light));
-        style.setColor(IveOfferwallStyle.Color.TOOL_BAR_TEXT, ContextCompat.getColor(this, android.R.color.white));
-        style.setColor(IveOfferwallStyle.Color.BUTTON_BG, ContextCompat.getColor(this, android.R.color.widget_edittext_dark));
-        style.setColor(IveOfferwallStyle.Color.BUTTON_TEXT, ContextCompat.getColor(this, android.R.color.background_light));
-        style.setColor(IveOfferwallStyle.Color.ACCENT_TEXT, ContextCompat.getColor(this, android.R.color.holo_blue_light));
+style.setColor(IveOfferwallStyle.Color.STATUS_BAR, ContextCompat.getColor(this, android.R.color.holo_blue_dark));
+style.setColor(IveOfferwallStyle.Color.TOOL_BAR_BG, ContextCompat.getColor(this, android.R.color.holo_blue_light));
+style.setColor(IveOfferwallStyle.Color.TOOL_BAR_TEXT, ContextCompat.getColor(this, android.R.color.white));
+style.setColor(IveOfferwallStyle.Color.BUTTON_BG, ContextCompat.getColor(this, android.R.color.widget_edittext_dark));
+style.setColor(IveOfferwallStyle.Color.BUTTON_TEXT, ContextCompat.getColor(this, android.R.color.background_light));
+style.setColor(IveOfferwallStyle.Color.ACCENT_TEXT, ContextCompat.getColor(this, android.R.color.holo_blue_light));
+style.setType(IveOfferwallStyle.Type.NORMAL);
 
  IveOfferwall.openActivity(activity, userId, style);
 ```
 
-위 예제를 보면 알 수 있듯이 `style.setColor()`메서드를 통해서 각 부분의 스타일을 변경할 수 있습니다.
+위 예제를 보면 알 수 있듯이  `style.setType()`메서드를 통해서 오퍼월의 타입을 변경할 수 있고, `style.setColor()` 메서드를 통해서 각 부분의 스타일을 변경할 수 있습니다.
 
-#### 3-1. 색상 키
+
+
+### 3-1. 오퍼월 타입
+
+오퍼월의 타입은 `IveOfferwallStyle.Type.BIG` 과 `IveOfferwallStyle.Type.NORMAL` 2가지 타입을 지원합니다.
+
+위에서 생성한 `IveOfferwallStyle` 객체에 `setType()` 메서드를 이용해서 오퍼월의 타입을 설정해줄 수 있습니다.
+
+| 타입                          | 설명                    |
+| ----------------------------- | ----------------------- |
+| IveOfferwallStyle.Type.NORMAL | 일반적인 오퍼월 스타일  |
+| IveOfferwallStyle.Type.BIG    | 큰 이미지 오퍼월 스타일 |
+
+
+
+### 3-2. 색상 키
 
 변경 가능한 색상키는 다음과 같습니다.
 
@@ -180,13 +196,13 @@ IveOfferwallStyle style = new IveOfferwallStyle();
 | IveOfferwall.Color.BUTTON_TEXT   | 광고 참여 버튼의 글자색을 설정합니다.                        |
 | IveOfferwall.Color.ACCENT_TEXT   | 강조 텍스트 색상을 설정합니다.(광고 참여를 누르면 나오는 다이얼로그에서의 강조 글자 등이 있습니다. |
 
-### 3-2. 색상 값
+### 3-3. 색상 값
 
 색상 값은 리소스 아이디가 아닌 실제 색상에 해당하는 int 값을 넣어야합니다.
 
 색상 값을 얻을 수 있는 몇가지 방법들을 소개합니다.
 
-#### 3-2-1. ContextCompat.getColor() 사용
+#### 3-3-1. ContextCompat.getColor() 사용
 
 `ContextCompat.getColor()`메서드의 두번째 인자에 색상의 리소스 아이디를 넣어서 실제 색상을 구할 수 있습니다.
 
@@ -194,7 +210,7 @@ IveOfferwallStyle style = new IveOfferwallStyle();
 int color = ContextCompat.getColor(this, android.R.color.widget_edittext_dark);
 ```
 
-#### 3-2-2. Color 클래스 사용
+#### 3-3-2. Color 클래스 사용
 
 [Color](https://developer.android.com/reference/android/graphics/Color.html) 클래스에서 색상 값을 얻을 수 있는 몇가지 방법이 있습니다.
 
@@ -202,6 +218,8 @@ int color = ContextCompat.getColor(this, android.R.color.widget_edittext_dark);
 int textColor = Color.parseColor("#fffefefe");
 int bgColor = Color.argb(255, 100, 20, 10);
 ```
+
+
 
 
 
@@ -263,6 +281,11 @@ compile 'com.android.support:design:27.0.0'
 필요한 디펜던시를 모두 명시적으로 추가한 뒤에 gradle sync를 수행하면 이 문제를 해결할 수 있습니다.
 
 ## 5. SDK 변경 이력
+
+### v 1.1.0
+
+* 오퍼월 타입을 선택할 수 있는 기능 추가(BIG / NORMAL)
+* NORMAL 타입 UI 개선
 
 ### v 1.0.9
 
