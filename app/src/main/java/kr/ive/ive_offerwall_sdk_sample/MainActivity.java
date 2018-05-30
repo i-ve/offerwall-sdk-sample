@@ -133,18 +133,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void openOfferwallActivity() {
         String id = getId();
         if(checkValidId(id)) {
+            IveOfferwall.UserData userData = new IveOfferwall.UserData(id);
+            userData.setAge(18);
+            userData.setSex(IveOfferwall.Sex.MALE);
+
             IveOfferwallStyle style = makeStyle();
 
-            IveOfferwall.openActivityForResult(this, id, 100, style);
+            IveOfferwall.openActivityForResult(this, userData, 100, style);
         }
     }
 
     private void openOfferwallFragment() {
         String id = getId();
         if(checkValidId(id)) {
+            IveOfferwall.UserData userData = new IveOfferwall.UserData(id);
+            userData.setAge(25);
+            userData.setSex(IveOfferwall.Sex.FEMALE);
+
             IveOfferwallStyle style = makeStyle();
 
-            setFragment(IveOfferwall.createFragment(this, id, style));
+            setFragment(IveOfferwall.createFragment(this, userData, style));
         }
     }
 
