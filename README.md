@@ -21,7 +21,7 @@ allprojects {
 ### 1-2. 모듈의 gradle.properties 파일의 dependencies에 다음 내용을 추가합니다.
 
 ```groovy
-compile 'kr.ive:offerwall_sdk:1.1.0'
+compile 'kr.ive:offerwall_sdk:1.1.2'
 ```
 gradle 파일을 수정하게 되면 Android Studio에서 `Sync Now`버튼이 보이게 됩니다. 
 Sync를 하게 되면 메이븐 저장소에서 오퍼월 SDK 라이브러리를 다운로드 받게 됩니다.(로컬 저장소에 다운받기 때문에 프로젝트에서는 볼 수 없습니다)
@@ -35,51 +35,83 @@ Sync를 하게 되면 메이븐 저장소에서 오퍼월 SDK 라이브러리를
 * `ive_sdk_offerwall_title`의 값에는 오퍼월 액티비티의 제목으로 사용할 텍스트를 넣습니다.
 
 ## 2. 오퍼월 SDK 사용하기
-### 2-1. 오퍼월 Activity 열기
+### 2-1. 유저 데이터<a name="user_data"></a>
 
-#### 2-1-1. IveOfferwall.openActivity()
+오퍼월 Activity나 Fragment를 열때 `IveOfferwall.UserData` 객체를 전달해줘야합니다.
+
+#### 2-1-1. 생성자
+
+`IveOfferwall.UserData` 의 생성자에는 유니크한 유저의 아이디 값을 넣어줘야 합니다.
+
+```java
+IveOfferwall.UserData userData = new IveOfferwall.UserData("uniqueUserId");
+```
+
+`IveOfferwall.UserData` 에는 유저 아이디 외에도 추가 정보를 넣을 수 있는 setter 메서드가 제공됩니다.
+
+#### 2-1-2. 나이 입력
+
+`IveOfferwall.UserData.setAge()` 메서드는 유저의 나이를 입력하는 메서드입니다. 유저의 나이를 알 수 있는 경우에만 이 메서드를 호출합니다.
+
+```java
+userData.setAge(20);
+```
+
+#### 2-1-3. 성별 입력
+
+`IveOfferwall.UserData.setSex()` 메서드는 유저의 성별을 입력하는 메서드입니다. 유저의 성별을 알 수 있는 경우에만 이 메서드를 호출합니다.
+
+```java
+userData.setSex(IveOfferwall.Sex.FEMALE);
+```
+
+성별에 해당하는 값은 `IveOfferwall.Sex` Enum에 있는 `FEMALE` 또는 `MALE` 중 하나의 값을 넣어줍니다.
+
+### 2-2. 오퍼월 Activity 열기
+
+#### 2-2-1. IveOfferwall.openActivity()
 
 오퍼월 `Activity`를 여는 기본적인 방법입니다.
 
 ```java
-IveOfferwall.openActivity(activity, userId, style);
+IveOfferwall.openActivity(activity, userData, style);
 ```
 
-2번째 인자인 userId는 유저를 식별할 수 있는 유일한 값이어야 합니다.
+2번째 인자인 userData는  [2-1. 유저 데이터](#user_data) 에서 설명한 유저 데이터 객체입니다. 
 
 3번째 인자인 style은 옵션으로 넣을 수 있습니다. 자세한 내용은 [3. 스타일링](#styling)을 참고해주세요.
 
-#### 2-1-2. IveOfferwall.openActivityForResult()
+#### 2-2-2. IveOfferwall.openActivityForResult()
 
 다음의 코드를 사용하면 오퍼월 `Activity`가 `Destroy`될 때 `onActivityResult()` 콜백을 받을 수 있습니다.
 
 ```java
-IveOfferwall.openActivityForResult(activity, userId, requestCode, style);
+IveOfferwall.openActivityForResult(activity, userData, requestCode, style);
 ```
 
 위 메서드에서 3번째 인자인 `requestCode`는 `onActivityResult()`에서 첫번째 인자인 `requestCode`로 넘어 갑니다.
 
 4번째 인자인 style은 옵션으로 넣을 수 있습니다. 자세한 내용은 [3. 스타일링](#styling)을 참고해주세요.
 
-### 2-2. 오퍼월 Fragment 생성
+### 2-3. 오퍼월 Fragment 생성
 
 ```java
-IveOfferwall.createFragment(context, userId, style)
+IveOfferwall.createFragment(context, userData, style)
 ```
 - 리턴값 : 생성된 `Fragment`
 
 3번째 인자인 style은 옵션으로 넣을 수 있습니다. 자세한 내용은 [3. 스타일링](#styling)을 참고해주세요.
 
-### 2-3. 유저 포인트 얻기
+### 2-4. 유저 포인트 얻기
 
 ```java
-String transactionKey = IveOfferwall.getPoint(context, userId, IveOfferwall.GetPointListener);
+String transactionKey = IveOfferwall.getPoint(context, userData, IveOfferwall.GetPointListener);
 ```
 IveOfferwall.getPoint()를 호출하면 `트랜잭션 키`를 반환합니다. 이 `트랜잭션 키`는 GetPointListener에서 결과를 받을 때 유효성을 검사하는 용도로 사용합니다.
 
 유저가 획득한 포인트는 비동기 방식으로 받아와서 `IveOfferwall.GetPointListener`로 전달됩니다.
 
-#### 2-3-1. IveOfferwall.GetPointListener 인터페이스
+#### 2-4-1. IveOfferwall.GetPointListener 인터페이스
 아이브 서버로부터 유저 포인트를 가져옵니다.
 
 ```java
@@ -92,7 +124,7 @@ public void onGetPointComplete(boolean isSuccess, long point, String errorMessag
 
 `isSuccess`가 `true`인 경우 [트랜잭션의 유효성을 검사](#validate_transaction)해야합니다.
 
-### 2-4. 유저 포인트 사용하기
+### 2-5. 유저 포인트 사용하기
 ```java
 String transactionKey = IveOfferwall.usePoint(context, userId, point, IveOfferwall.UsePointListener);
 ```
@@ -100,7 +132,7 @@ IveOfferwall.usePoint()를 호출하면 `트랜잭션 키`를 반환합니다. �
 
 point만큼의 포인트를 사용합니다. 사용 결과는 `IveOfferwall.UsePointListener`를 통해 전달됩니다.
 
-#### 2-4-1. IveOfferwall.UsePointListener 인터페이스
+#### 2-5-1. IveOfferwall.UsePointListener 인터페이스
 아이브 서버로부터 유저 포인트 사용 결과를 받습니다.
 ```java
 public void onUsePointComplete(boolean isSuccess, long remainPoint, String errorMessage, String hash);
@@ -112,7 +144,7 @@ public void onUsePointComplete(boolean isSuccess, long remainPoint, String error
 
 `isSuccess`가 `true`인 경우 [트랜잭션의 유효성을 검사](#validate_transaction)해야합니다.
 
-### 2-5. 트랜잭션의 유효성 검사<a name="validate_transaction"></a>
+### 2-6. 트랜잭션의 유효성 검사<a name="validate_transaction"></a>
 
 `IveOfferwall.getPoint()` 나 `IveOfferwall.usePoint()` 를 하는 경우, 트랜잭션이 유효한지 검사해야합니다.
 
@@ -281,6 +313,10 @@ compile 'com.android.support:design:27.0.0'
 필요한 디펜던시를 모두 명시적으로 추가한 뒤에 gradle sync를 수행하면 이 문제를 해결할 수 있습니다.
 
 ## 5. SDK 변경 이력
+
+### v 1.1.2
+
+* 오퍼월 Activity/Fragment를 열때 userId 값 대신 UserData 객체를 받도록 수정
 
 ### v 1.1.0
 
