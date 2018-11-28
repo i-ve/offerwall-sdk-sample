@@ -104,6 +104,8 @@ IveOfferwall.createFragment(context, userData, style)
 
 ### 2-4. 유저 포인트 얻기
 
+**아이브 서버에서 매체 서버로 포스트백을 전송하게끔 설정하신 경우에 이 부분은 SKIP하시면 됩니다.**
+
 ```java
 String transactionKey = IveOfferwall.getPoint(context, userData, IveOfferwall.GetPointListener);
 ```
@@ -125,6 +127,9 @@ public void onGetPointComplete(boolean isSuccess, long point, String errorMessag
 `isSuccess`가 `true`인 경우 [트랜잭션의 유효성을 검사](#validate_transaction)해야합니다.
 
 ### 2-5. 유저 포인트 사용하기
+
+**아이브 서버에서 매체 서버로 포스트백을 전송하게끔 설정하신 경우에 이 부분은 SKIP하시면 됩니다.**
+
 ```java
 String transactionKey = IveOfferwall.usePoint(context, userId, point, IveOfferwall.UsePointListener);
 ```
@@ -145,6 +150,8 @@ public void onUsePointComplete(boolean isSuccess, long remainPoint, String error
 `isSuccess`가 `true`인 경우 [트랜잭션의 유효성을 검사](#validate_transaction)해야합니다.
 
 ### 2-6. 트랜잭션의 유효성 검사<a name="validate_transaction"></a>
+
+**아이브 서버에서 매체 서버로 포스트백을 전송하게끔 설정하신 경우에 이 부분은 SKIP하시면 됩니다.**
 
 `IveOfferwall.getPoint()` 나 `IveOfferwall.usePoint()` 를 하는 경우, 트랜잭션이 유효한지 검사해야합니다.
 
