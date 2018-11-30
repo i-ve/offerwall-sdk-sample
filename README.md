@@ -21,7 +21,7 @@ allprojects {
 ### 1-2. 모듈의 gradle.properties 파일의 dependencies에 다음 내용을 추가합니다.
 
 ```groovy
-compile 'kr.ive:offerwall_sdk:1.1.5'
+compile 'kr.ive:offerwall_sdk:1.1.7'
 ```
 gradle 파일을 수정하게 되면 Android Studio에서 `Sync Now`버튼이 보이게 됩니다. 
 Sync를 하게 되면 메이븐 저장소에서 오퍼월 SDK 라이브러리를 다운로드 받게 됩니다.(로컬 저장소에 다운받기 때문에 프로젝트에서는 볼 수 없습니다)
@@ -320,6 +320,11 @@ compile 'com.android.support:design:27.0.0'
 필요한 디펜던시를 모두 명시적으로 추가한 뒤에 gradle sync를 수행하면 이 문제를 해결할 수 있습니다.
 
 ## 5. SDK 변경 이력
+
+### v 1.1.7
+
+* 광고 상세 화면이 표시된 상태에서 화면 회전시 강제 종료되는 문제 수정
+* 일부 해상도의 기기에서 포인트 텍스트가 잘려보이는 문제 수정
 
 ### v 1.1.5
 
