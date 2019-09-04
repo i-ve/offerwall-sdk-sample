@@ -21,7 +21,7 @@ allprojects {
 ### 1-2. 모듈의 gradle.properties 파일의 dependencies에 다음 내용을 추가합니다.
 
 ```groovy
-compile 'kr.ive:offerwall_sdk:1.1.8'
+compile 'kr.ive:offerwall_sdk:1.1.9'
 ```
 gradle 파일을 수정하게 되면 Android Studio에서 `Sync Now`버튼이 보이게 됩니다. 
 Sync를 하게 되면 메이븐 저장소에서 오퍼월 SDK 라이브러리를 다운로드 받게 됩니다.(로컬 저장소에 다운받기 때문에 프로젝트에서는 볼 수 없습니다)
@@ -33,6 +33,30 @@ Sync를 하게 되면 메이븐 저장소에서 오퍼월 SDK 라이브러리를
 ```
 * `ive_sdk_app_code`의 값에는 발급받은 앱코드를 삽입합니다. 위에서 사용하고 있는 값은 테스트를 위한 용도입니다.
 * `ive_sdk_offerwall_title`의 값에는 오퍼월 액티비티의 제목으로 사용할 텍스트를 넣습니다.
+
+### 1-4. AndroidManifest.xml 파일의 application에 networkSecurityConfig를 설정합니다.
+
+```xml
+<application
+             ...
+             android:networkSecurityConfig="@xml/network_security_config">
+  ...
+</application>
+```
+
+- `res` 폴더의 하위에 `xml` 폴더를 생성하고, `network_security_config.xml` 파일을 만듭니다.
+- `res/xml/network_security_config.xml` 파일의 내용에는 아래의 코드가 포함돼있어야 합니다.
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">i-screen.kr</domain>
+    </domain-config>
+</network-security-config>
+```
+
+
 
 ## 2. 오퍼월 SDK 사용하기
 ### 2-1. 유저 데이터<a name="user_data"></a>
