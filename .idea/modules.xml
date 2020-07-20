@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/ive-offerwall-sdk-sample.iml" filepath="$PROJECT_DIR$/ive-offerwall-sdk-sample.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" group="ive-offerwall-sdk-sample/app" />
+      <module fileurl="file://$PROJECT_DIR$/ive-offerwall-sdk-sample.iml" filepath="$PROJECT_DIR$/ive-offerwall-sdk-sample.iml" group="ive-offerwall-sdk-sample" />
     </modules>
   </component>
 </project>
