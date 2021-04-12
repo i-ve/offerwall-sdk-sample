@@ -34,5 +34,5 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     testImplementation 'junit:junit:4.12'
 
-    implementation 'kr.ive:offerwall_sdk:1.2.11'
+    implementation 'kr.ive:offerwall_sdk:1.2.12'
 }
